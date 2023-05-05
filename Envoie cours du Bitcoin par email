@@ -1,0 +1,57 @@
+import requests
+import smtplib
+import time
+from datetime import datetime
+from email.mime.text import MIMEText
+
+# Paramètres de l'API CoinGecko
+coin_id = 'bitcoin'
+currency = 'eur'
+
+# Paramètres de l'email
+# remplacer les éléments ici par vos propres paramètres
+sender_email = 'exemple@mail.com' 
+sender_password = 'password'
+receiver_email = 'exemple@mail.com'
+
+def get_btc_price():
+    # Appel de l'API CoinGecko pour obtenir le prix actuel du Bitcoin
+    url = f'https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies={currency}'
+    response = requests.get(url)
+    price = response.json()[coin_id][currency]
+
+    return price
+
+def send_email(subject, message):
+    # Connexion au serveur SMTP de outlook
+    server = smtplib.SMTP('smtp.office365.com', 587)
+    server.starttls()
+    server.login(sender_email, sender_password)
+
+    # Création du message MIME
+    msg = MIMEText(message)
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+
+    # Envoi du message
+    server.sendmail(sender_email, receiver_email, msg.as_string())
+    server.quit()
+
+
+while True:
+    # Récupération du prix du Bitcoin et de l'heure actuelle
+    price = get_btc_price()
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+
+    # Envoi de l'email si l'heure est 10h
+    if current_time >= "10:00:00" and current_time <= "10:02:00" :
+        subject = 'Cours du Bitcoin'
+        message = f'Le cours actuel du Bitcoin est de {price} {currency.upper()}'
+        send_email(subject, message)
+
+    # Attente d'une minute avant de vérifier à nouveau l'heure
+    time.sleep(60)
+
+
