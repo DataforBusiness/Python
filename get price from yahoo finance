@@ -1,0 +1,24 @@
+import requests
+from bs4 import BeautifulSoup
+
+def scrape_yahoo_finance():
+    url = "https://finance.yahoo.com/quote/%5EFCHI?p=^FCHI&.tsrc=fin-srch"
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Extraire les données
+    price = soup.find("fin-streamer", class_="Fw(b) Fz(36px) Mb(-4px) D(ib)").text.strip()
+    
+    change_value = soup.find("fin-streamer", class_="Fw(500) Pstart(8px) Fz(24px)" , attrs={"data-field": "regularMarketChange"}).text.strip()
+    
+    change_percent = soup.find("fin-streamer", class_="Fw(500) Pstart(8px) Fz(24px)" , attrs={"data-field": "regularMarketChangePercent"}).text.strip()
+
+    print(f"Prix : {price}")
+    print(f"Changement en pourcentage : {change_percent}")
+    print(f"Changement en valeur : {change_value}")
+
+if __name__ == "__main__":
+    scrape_yahoo_finance()
